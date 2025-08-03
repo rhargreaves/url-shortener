@@ -48,11 +48,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Setup Google Cloud Auth
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
     - name: Setup Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
       with:
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configure Docker for GCR
       run: gcloud auth configure-docker
