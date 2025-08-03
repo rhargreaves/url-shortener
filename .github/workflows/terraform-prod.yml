@@ -122,7 +122,7 @@ jobs:
 
     - name: Upload Terraform Outputs
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: terraform-outputs-prod
         path: terraform-outputs-prod.json
