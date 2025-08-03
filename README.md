@@ -10,7 +10,7 @@ This project demonstrates a production-ready URL shortener service deployed on G
 - **Infrastructure as Code** using Terraform
 - **Security best practices** with Binary Authorization, mTLS, and RBAC
 - **Comprehensive monitoring** and alerting
-- **CI/CD pipelines** with Cloud Build
+- **CI/CD pipelines** with GitHub Actions
 
 ## Architecture Overview
 
@@ -35,7 +35,7 @@ Organization
 - **Container Orchestration**: Google Kubernetes Engine (GKE) with Autopilot
 - **Service Mesh**: Istio for traffic management, security, and observability
 - **Infrastructure**: Terraform with modular design
-- **CI/CD**: Cloud Build with Binary Authorization
+- **CI/CD**: GitHub Actions with comprehensive security scanning
 - **Monitoring**: Cloud Operations Suite with custom dashboards
 - **Security**: Cloud Security Command Center, KMS, Secret Manager
 - **Networking**: Shared VPC with Cloud NAT
@@ -60,7 +60,7 @@ Organization
 │   ├── monitoring/                # Monitoring configs
 │   └── *.yaml                     # Application manifests
 ├── scripts/                       # Setup and utility scripts
-├── cloudbuild.yaml               # CI/CD pipeline
+├── .github/workflows/            # GitHub Actions CI/CD
 ├── Dockerfile                    # Container image
 ├── Makefile                      # Deployment automation
 └── README.md                     # This file
@@ -89,38 +89,50 @@ Organization
 git clone <repository-url>
 cd url-shortener
 
-# Set environment variables
-export ORG_ID="your-organization-id"
-export BILLING_ACCOUNT="your-billing-account-id"
-export PROJECT_PREFIX="urlshort"  # Optional: customize project prefix
+# Set up environment
+cp .env.example .env
+# Edit .env with your actual GCP values
+
+# Source environment variables
+source .env
 
 # Run setup script
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
 ```
 
-### 2. Configure Variables
+### 2. Configure GitHub Secrets
 
-Update the configuration files with your specific values:
+Set up repository secrets for GitHub Actions:
 
 ```bash
-# Edit development configuration
-vim infra/environments/dev/terraform.tfvars
-
-# Edit production configuration
-vim infra/environments/prod/terraform.tfvars
+# Required secrets in GitHub repository settings:
+GCP_ORG_ID              # Your GCP Organization ID
+GCP_BILLING_ACCOUNT     # Your Billing Account ID
+DOMAIN_NAME             # Your domain (e.g., go.r19s.net)
+GCP_FOLDER_ID           # GCP Folder ID (optional, can be empty)
+GCP_SA_KEY              # Service Account JSON key
+GCP_PROJECT_ID          # Default project for gcloud commands
 ```
 
 ### 3. Deploy Infrastructure
 
+**Using GitHub Actions (Recommended):**
 ```bash
-# Deploy development environment
+# Push to main branch - automatically deploys to dev
+git add .
+git commit -m "Initial infrastructure setup"
+git push origin main
+
+# For production: Use GitHub UI workflow dispatch
+# Go to Actions → Deploy Production Infrastructure → Run workflow
+```
+
+**Using Local Make Commands:**
+```bash
+# Local deployment (requires gcloud setup)
 make plan-dev    # Review the plan
 make apply-dev   # Apply changes
-
-# Deploy production environment
-make plan-prod   # Review the plan
-make apply-prod  # Apply changes
 ```
 
 ### 4. Deploy Application
@@ -164,10 +176,10 @@ make status
 - Multi-zone deployment for high availability
 
 ### 🔄 CI/CD Integration
-- Automated builds with Cloud Build
-- Container vulnerability scanning
-- Binary Authorization attestation
-- Automated deployment to GKE
+- **GitHub Actions workflows** for infrastructure and applications
+- **Comprehensive security scanning** (Terraform, containers, dependencies)
+- **Environment protection** with manual approvals for production
+- **Automated dev deployment** with manual production promotion
 
 ## Configuration
 

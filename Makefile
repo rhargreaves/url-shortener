@@ -10,7 +10,7 @@ BILLING_ACCOUNT := 012345-678901-234567
 .PHONY: help
 help:
 	@echo "Available targets:"
-		@echo "  help                 Show this help message"
+			@echo "  help                 Show this help message"
 	@echo "  init                 Initialize Terraform backends"
 	@echo "  check-env           Check required environment variables"
 	@echo "  plan-dev            Plan development infrastructure"
@@ -24,7 +24,13 @@ help:
 	@echo "  deploy-prod         Deploy to production"
 	@echo "  lint                Lint Terraform files"
 	@echo "  validate            Validate Terraform configuration"
+	@echo "  security-scan       Run local security scans"
 	@echo "  clean               Clean up temporary files"
+	@echo ""
+	@echo "GitHub Actions:"
+	@echo "  - Push to main: Automatically deploys to dev"
+	@echo "  - Manual prod deploy: Use GitHub UI workflow dispatch"
+	@echo "  - Security scans: Run automatically on push/PR"
 
 # Initialize Terraform backends
 .PHONY: init
@@ -148,3 +154,12 @@ logs:
 status:
 	kubectl get pods,svc,ingress -n url-shortener
 	kubectl get pods,svc -n istio-system
+
+# Security scanning (local)
+.PHONY: security-scan
+security-scan:
+	@echo "Running local security scans..."
+	@command -v checkov >/dev/null 2>&1 || { echo "Install checkov: pip install checkov"; exit 1; }
+	@command -v hadolint >/dev/null 2>&1 || { echo "Install hadolint: brew install hadolint"; exit 1; }
+	checkov -d infra/ --framework terraform
+	hadolint Dockerfile

@@ -44,8 +44,8 @@ kubeconfig
 .env.development
 .env.production
 
-# Cloud Build
-.gcloudignore
+# GitHub Actions
+# (artifacts are handled by GitHub)
 
 # Backup files
 *.bak

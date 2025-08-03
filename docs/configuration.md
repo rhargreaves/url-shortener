@@ -147,14 +147,7 @@ env:
   TF_VAR_folder_id: ${{ secrets.GCP_FOLDER_ID }}
 ```
 
-### Cloud Build
-```yaml
-substitutions:
-  _ORGANIZATION_ID: '123456789012'
-  _BILLING_ACCOUNT: '012345-678901-234567'
-  _DOMAIN_NAME: 'go.r19s.net'
-  _FOLDER_ID: ''
-```
+
 
 ## Best Practices
 
