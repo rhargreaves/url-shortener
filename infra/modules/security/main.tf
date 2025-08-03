@@ -41,7 +41,8 @@ resource "google_secret_manager_secret" "database_url" {
   secret_id = "database-url"
 
   replication {
-    automatic = true
+    auto {
+    }
   }
 
   labels = var.labels
@@ -52,7 +53,8 @@ resource "google_secret_manager_secret" "redis_url" {
   secret_id = "redis-url"
 
   replication {
-    automatic = true
+    auto {
+    }
   }
 
   labels = var.labels
@@ -63,7 +65,8 @@ resource "google_secret_manager_secret" "app_secret_key" {
   secret_id = "app-secret-key"
 
   replication {
-    automatic = true
+    auto {
+    }
   }
 
   labels = var.labels
@@ -111,9 +114,9 @@ resource "google_binary_authorization_policy" "policy" {
   }
 
   cluster_admission_rules {
-    cluster                 = "${var.region}.${var.gke_cluster_name}"
-    evaluation_mode        = "REQUIRE_ATTESTATION"
-    enforcement_mode       = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+    cluster          = "${var.region}.${var.gke_cluster_name}"
+    evaluation_mode  = "REQUIRE_ATTESTATION"
+    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
 
     require_attestations_by = [
       google_binary_authorization_attestor.build_attestor.name
@@ -131,7 +134,7 @@ resource "google_binary_authorization_attestor" "build_attestor" {
 
     public_keys {
       ascii_armored_pgp_public_key = var.pgp_public_key
-      id                          = "pgp-key-1"
+      id                           = "pgp-key-1"
     }
   }
 }
@@ -200,7 +203,7 @@ resource "google_monitoring_alert_policy" "high_risk_security_events" {
     condition_threshold {
       filter          = "resource.type=\"gce_instance\" AND metric.type=\"logging.googleapis.com/user/security-events\""
       duration        = "300s"
-      comparison      = "COMPARISON_GREATER_THAN"
+      comparison      = "COMPARISON_GT"
       threshold_value = 0
 
       aggregations {

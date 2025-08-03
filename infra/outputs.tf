@@ -36,17 +36,17 @@ output "gke_cluster_endpoint" {
 
 output "shared_vpc_network" {
   description = "Shared VPC network self link"
-  value       = module.shared_network.vpc_network
+  value       = module.shared_vpc.vpc_network
 }
 
 output "app_subnet" {
   description = "Application subnet self link"
-  value       = module.shared_network.app_subnet
+  value       = module.shared_vpc.app_subnet
 }
 
 output "gke_subnet" {
   description = "GKE subnet self link"
-  value       = module.shared_network.gke_subnet
+  value       = module.shared_vpc.gke_subnet
 }
 
 output "load_balancer_ip" {

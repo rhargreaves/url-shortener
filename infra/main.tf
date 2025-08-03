@@ -5,8 +5,8 @@ locals {
   }
 
   shared_projects = {
-    network           = "${var.project_prefix}-shared-network"
-    security         = "${var.project_prefix}-security"
+    network            = "${var.project_prefix}-shared-network"
+    security           = "${var.project_prefix}-security"
     logging_monitoring = "${var.project_prefix}-logging-monitoring"
   }
 
@@ -21,11 +21,11 @@ locals {
 module "shared_network" {
   source = "./modules/project-factory"
 
-  project_id       = local.shared_projects.network
-  project_name     = "URL Shortener - Shared Network"
-  organization_id  = var.organization_id
-  billing_account  = var.billing_account
-  folder_id        = var.folder_id
+  project_id      = local.shared_projects.network
+  project_name    = "URL Shortener - Shared Network"
+  organization_id = var.organization_id
+  billing_account = var.billing_account
+  folder_id       = var.folder_id
 
   services = [
     "compute.googleapis.com",
@@ -42,11 +42,11 @@ module "shared_network" {
 module "security" {
   source = "./modules/project-factory"
 
-  project_id       = local.shared_projects.security
-  project_name     = "URL Shortener - Security"
-  organization_id  = var.organization_id
-  billing_account  = var.billing_account
-  folder_id        = var.folder_id
+  project_id      = local.shared_projects.security
+  project_name    = "URL Shortener - Security"
+  organization_id = var.organization_id
+  billing_account = var.billing_account
+  folder_id       = var.folder_id
 
   services = [
     "securitycenter.googleapis.com",
@@ -63,11 +63,11 @@ module "security" {
 module "logging_monitoring" {
   source = "./modules/project-factory"
 
-  project_id       = local.shared_projects.logging_monitoring
-  project_name     = "URL Shortener - Logging & Monitoring"
-  organization_id  = var.organization_id
-  billing_account  = var.billing_account
-  folder_id        = var.folder_id
+  project_id      = local.shared_projects.logging_monitoring
+  project_name    = "URL Shortener - Logging & Monitoring"
+  organization_id = var.organization_id
+  billing_account = var.billing_account
+  folder_id       = var.folder_id
 
   services = [
     "logging.googleapis.com",
@@ -84,11 +84,11 @@ module "logging_monitoring" {
 module "app_project" {
   source = "./modules/project-factory"
 
-  project_id       = local.environment_projects.app
-  project_name     = "URL Shortener - ${title(var.environment)} App"
-  organization_id  = var.organization_id
-  billing_account  = var.billing_account
-  folder_id        = var.folder_id
+  project_id      = local.environment_projects.app
+  project_name    = "URL Shortener - ${title(var.environment)} App"
+  organization_id = var.organization_id
+  billing_account = var.billing_account
+  folder_id       = var.folder_id
 
   services = [
     "container.googleapis.com",
@@ -111,11 +111,11 @@ module "app_project" {
 module "ci_project" {
   source = "./modules/project-factory"
 
-  project_id       = local.environment_projects.ci
-  project_name     = "URL Shortener - ${title(var.environment)} CI"
-  organization_id  = var.organization_id
-  billing_account  = var.billing_account
-  folder_id        = var.folder_id
+  project_id      = local.environment_projects.ci
+  project_name    = "URL Shortener - ${title(var.environment)} CI"
+  organization_id = var.organization_id
+  billing_account = var.billing_account
+  folder_id       = var.folder_id
 
   services = [
     "cloudbuild.googleapis.com",
@@ -153,23 +153,23 @@ module "shared_vpc" {
 module "gke" {
   source = "./modules/gke"
 
-  project_id        = module.app_project.project_id
-  cluster_name      = "${var.environment}-url-shortener"
-  region            = var.region
-  zones             = var.zones
+  project_id   = module.app_project.project_id
+  cluster_name = "${var.environment}-url-shortener"
+  region       = var.region
+  zones        = var.zones
 
   network_project_id = module.shared_network.project_id
-  network           = module.shared_vpc.vpc_network
-  subnet            = module.shared_vpc.gke_subnet
+  network            = module.shared_vpc.vpc_network
+  subnet             = module.shared_vpc.gke_subnet
 
   pods_range_name     = module.shared_vpc.gke_pods_range_name
   services_range_name = module.shared_vpc.gke_services_range_name
-  domain_name        = var.domain_name
+  domain_name         = var.domain_name
 
   enable_istio     = var.enable_istio
   enable_autopilot = var.enable_autopilot
-  node_count      = var.node_count
-  machine_type    = var.machine_type
+  node_count       = var.node_count
+  machine_type     = var.machine_type
 
   labels = local.common_labels
 
@@ -181,8 +181,8 @@ module "security_config" {
   source = "./modules/security"
 
   security_project_id = module.security.project_id
-  app_project_id     = module.app_project.project_id
-  ci_project_id      = module.ci_project.project_id
+  app_project_id      = module.app_project.project_id
+  ci_project_id       = module.ci_project.project_id
 
   organization_id = var.organization_id
 

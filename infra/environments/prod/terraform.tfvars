@@ -22,4 +22,4 @@ enable_istio     = true
 
 # Production-specific settings (if using standard GKE)
 node_count   = 3
-machine_type = "e2-standard-4"  # Larger instances for prod
+machine_type = "e2-standard-4" # Larger instances for prod

@@ -22,4 +22,4 @@ enable_istio     = true
 
 # Development-specific settings (if using standard GKE)
 node_count   = 1
-machine_type = "e2-standard-2"  # Smaller instances for dev
+machine_type = "e2-standard-2" # Smaller instances for dev

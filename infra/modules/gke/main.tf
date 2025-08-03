@@ -78,13 +78,7 @@ resource "google_container_cluster" "primary" {
       enabled = true
     }
 
-    dynamic "istio_config" {
-      for_each = var.enable_istio ? [1] : []
-      content {
-        disabled = false
-        auth     = "AUTH_MUTUAL_TLS"
-      }
-    }
+
   }
 
   # Workload Identity
@@ -96,7 +90,9 @@ resource "google_container_cluster" "primary" {
   enable_shielded_nodes = true
 
   # Binary Authorization
-  enable_binary_authorization = true
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
 
   # Network tags for firewall rules
   node_config {
@@ -133,10 +129,7 @@ resource "google_container_cluster" "primary" {
   logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
 
-  # Cluster telemetry
-  cluster_telemetry {
-    type = "ENABLED"
-  }
+
 
   # Release channel
   release_channel {
@@ -203,7 +196,9 @@ resource "google_container_cluster" "autopilot" {
   }
 
   # Binary Authorization
-  enable_binary_authorization = true
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
 
   # Resource labels
   resource_labels = var.labels

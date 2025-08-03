@@ -118,7 +118,7 @@ resource "google_monitoring_metric_descriptor" "url_shortener_latency" {
 
 # Dashboard for application monitoring
 resource "google_monitoring_dashboard" "url_shortener_dashboard" {
-  project        = var.logging_project_id
+  project = var.logging_project_id
   dashboard_json = jsonencode({
     displayName = "URL Shortener Dashboard"
 
@@ -239,7 +239,7 @@ resource "google_monitoring_alert_policy" "high_error_rate" {
     condition_threshold {
       filter          = "metric.type=\"custom.googleapis.com/url_shortener/requests_total\" AND metric.label.status_code!=\"200\""
       duration        = "300s"
-      comparison      = "COMPARISON_GREATER_THAN"
+      comparison      = "COMPARISON_GT"
       threshold_value = 0.05
 
       aggregations {
@@ -269,7 +269,7 @@ resource "google_monitoring_alert_policy" "high_latency" {
     condition_threshold {
       filter          = "metric.type=\"custom.googleapis.com/url_shortener/request_latency\""
       duration        = "300s"
-      comparison      = "COMPARISON_GREATER_THAN"
+      comparison      = "COMPARISON_GT"
       threshold_value = 1000
 
       aggregations {
@@ -299,7 +299,7 @@ resource "google_monitoring_alert_policy" "pod_crash_loop" {
     condition_threshold {
       filter          = "resource.type=\"k8s_container\" AND metric.type=\"kubernetes.io/container/restart_count\""
       duration        = "300s"
-      comparison      = "COMPARISON_GREATER_THAN"
+      comparison      = "COMPARISON_GT"
       threshold_value = 5
 
       aggregations {
@@ -336,9 +336,9 @@ resource "google_monitoring_uptime_check_config" "url_shortener_uptime" {
   period       = "300s"
 
   http_check {
-    port         = 443
-    use_ssl      = true
-    path         = "/health"
+    port           = 443
+    use_ssl        = true
+    path           = "/health"
     request_method = "GET"
   }
 

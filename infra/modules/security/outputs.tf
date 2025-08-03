@@ -35,7 +35,7 @@ output "security_notification_topic" {
 
 output "binary_authorization_policy" {
   description = "Binary Authorization policy"
-  value       = google_binary_authorization_policy.policy.name
+  value       = google_binary_authorization_policy.policy.id
 }
 
 output "build_attestor_name" {
