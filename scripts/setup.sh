@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# URL Shortener Infrastructure Setup Script
+set -euo pipefail
+
+# Configuration
+PROJECT_PREFIX="${PROJECT_PREFIX:-urlshort}"
+REGION="${REGION:-us-central1}"
+ORG_ID="${ORG_ID:-}"
+BILLING_ACCOUNT="${BILLING_ACCOUNT:-}"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Logging functions
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check prerequisites
+check_prerequisites() {
+    log_info "Checking prerequisites..."
+
+    command -v gcloud >/dev/null 2>&1 || { log_error "gcloud CLI is required but not installed."; exit 1; }
+    command -v terraform >/dev/null 2>&1 || { log_error "Terraform is required but not installed."; exit 1; }
+    command -v kubectl >/dev/null 2>&1 || { log_error "kubectl is required but not installed."; exit 1; }
+
+    if [[ -z "$ORG_ID" ]]; then
+        log_error "ORG_ID environment variable is required"
+        exit 1
+    fi
+
+    if [[ -z "$BILLING_ACCOUNT" ]]; then
+        log_error "BILLING_ACCOUNT environment variable is required"
+        exit 1
+    fi
+
+    log_info "Prerequisites check passed"
+}
+
+# Setup gcloud authentication
+setup_auth() {
+    log_info "Setting up authentication..."
+
+    if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q .; then
+        log_info "No active gcloud authentication found. Please run 'gcloud auth login'"
+        gcloud auth login
+    fi
+
+    # Enable application default credentials
+    gcloud auth application-default login
+
+    log_info "Authentication setup complete"
+}
+
+# Create initial projects for state management
+create_state_projects() {
+    log_info "Creating projects for Terraform state management..."
+
+    # Create shared network project for state buckets
+    gcloud projects create "${PROJECT_PREFIX}-shared-network" \
+        --organization="$ORG_ID" \
+        --name="URL Shortener - Shared Network" || true
+
+    # Link billing account
+    gcloud billing projects link "${PROJECT_PREFIX}-shared-network" \
+        --billing-account="$BILLING_ACCOUNT"
+
+    # Enable required APIs
+    gcloud services enable storage.googleapis.com \
+        --project="${PROJECT_PREFIX}-shared-network"
+
+    log_info "State management projects created"
+}
+
+# Create Terraform state buckets
+create_state_buckets() {
+    log_info "Creating Terraform state buckets..."
+
+    gsutil mb -p "${PROJECT_PREFIX}-shared-network" \
+        "gs://${PROJECT_PREFIX}-terraform-state-dev" 2>/dev/null || true
+
+    gsutil mb -p "${PROJECT_PREFIX}-shared-network" \
+        "gs://${PROJECT_PREFIX}-terraform-state-prod" 2>/dev/null || true
+
+    # Enable versioning
+    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-dev"
+    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-prod"
+
+    log_info "Terraform state buckets created"
+}
+
+# Initialize Terraform
+init_terraform() {
+    log_info "Initializing Terraform..."
+
+    cd infra
+    terraform init
+
+    cd environments/dev
+    terraform init
+
+    cd ../prod
+    terraform init
+
+    cd ../../..
+
+    log_info "Terraform initialization complete"
+}
+
+# Update configuration files
+update_config() {
+    log_info "Setting up environment variables..."
+
+    # Create .env file from template
+    if [[ ! -f ".env" ]]; then
+        cp .env.example .env
+
+        # Update .env with actual values
+        sed -i.bak "s/TF_VAR_organization_id=\"123456789012\"/TF_VAR_organization_id=\"$ORG_ID\"/" .env
+        sed -i.bak "s/TF_VAR_billing_account=\"012345-678901-234567\"/TF_VAR_billing_account=\"$BILLING_ACCOUNT\"/" .env
+
+        log_info "Created .env file with your configuration"
+        log_warn "Review and customize .env file as needed"
+    else
+        log_info ".env file already exists, skipping"
+    fi
+
+    # Update bucket names in backend configs
+    sed -i.bak "s/bucket = \"urlshort-terraform-state-dev\"/bucket = \"${PROJECT_PREFIX}-terraform-state-dev\"/" \
+        infra/environments/dev/main.tf
+    sed -i.bak "s/bucket = \"urlshort-terraform-state-prod\"/bucket = \"${PROJECT_PREFIX}-terraform-state-prod\"/" \
+        infra/environments/prod/main.tf
+
+    log_info "Configuration files updated"
+}
+
+# Main execution
+main() {
+    log_info "Starting URL Shortener infrastructure setup..."
+
+    check_prerequisites
+    setup_auth
+    create_state_projects
+    create_state_buckets
+    update_config
+    init_terraform
+
+    log_info "Setup complete! Next steps:"
+    echo "1. Source the environment: source .env"
+    echo "2. Review and customize .env file with your specific values"
+    echo "3. Run 'make plan-dev' to review the development infrastructure plan"
+    echo "4. Run 'make apply-dev' to create the development infrastructure"
+    echo "5. Repeat for production environment with 'make plan-prod' and 'make apply-prod'"
+}
+
+# Run main function
+main "$@"

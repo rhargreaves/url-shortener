@@ -1,0 +1,83 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: url-shortener-gateway
+  namespace: url-shortener
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "short.example.com"
+    - "dev.short.example.com"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: url-shortener-tls
+    hosts:
+    - "short.example.com"
+    - "dev.short.example.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: url-shortener-vs
+  namespace: url-shortener
+spec:
+  hosts:
+  - "short.example.com"
+  - "dev.short.example.com"
+  gateways:
+  - url-shortener-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /health
+    route:
+    - destination:
+        host: url-shortener
+        port:
+          number: 80
+    timeout: 5s
+  - match:
+    - uri:
+        prefix: /ready
+    route:
+    - destination:
+        host: url-shortener
+        port:
+          number: 80
+    timeout: 5s
+  - match:
+    - uri:
+        prefix: /api/
+    route:
+    - destination:
+        host: url-shortener
+        port:
+          number: 80
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: url-shortener
+        port:
+          number: 80
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s

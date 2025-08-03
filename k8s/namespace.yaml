@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: url-shortener
+  labels:
+    app: url-shortener
+    istio-injection: enabled
+    version: v1
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: url-shortener-system
+  labels:
+    app: url-shortener
+    istio-injection: enabled
+    version: v1

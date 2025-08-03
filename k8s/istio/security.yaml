@@ -1,0 +1,60 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: url-shortener
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-frontend
+  namespace: url-shortener
+spec:
+  selector:
+    matchLabels:
+      app: url-shortener
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  - to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+        paths: ["/api/*", "/health", "/ready", "/"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-redis-access
+  namespace: url-shortener
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/url-shortener/sa/url-shortener"]
+  - to:
+    - operation:
+        ports: ["6379"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-auth
+  namespace: url-shortener
+spec:
+  selector:
+    matchLabels:
+      app: url-shortener
+  jwtRules:
+  - issuer: "https://accounts.google.com"
+    audiences:
+    - "your-client-id.apps.googleusercontent.com"
+    jwksUri: "https://www.googleapis.com/oauth2/v3/certs"
