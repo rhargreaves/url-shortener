@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 1.0"
 
   backend "gcs" {
-    bucket = "rh-urlshort-terraform-state-dev-v2"
-    prefix = "dev/terraform.tfstate"
+    # bucket and prefix will be configured via backend config
+    # Use: terraform init -backend-config="bucket=YOUR_BUCKET"
   }
 
   required_providers {

@@ -1,11 +1,5 @@
 # URL Shortener Infrastructure Management
 
-# Configuration
-PROJECT_PREFIX := rh-urlshort
-REGION := europe-west1
-ORG_ID := 123456789012
-BILLING_ACCOUNT := 012345-678901-234567
-
 # Help target
 .PHONY: help
 help:
@@ -42,8 +36,12 @@ init:
 	gsutil versioning set on gs://$(PROJECT_PREFIX)-terraform-state-prod
 	@echo "Initializing Terraform..."
 	cd infra && terraform init
-	cd infra/environments/dev && terraform init
-	cd infra/environments/prod && terraform init
+	cd infra/environments/dev && terraform init \
+		-backend-config="bucket=$(PROJECT_PREFIX)-terraform-state-dev-$(VERSION_SUFFIX)" \
+		-backend-config="prefix=dev/terraform.tfstate"
+	cd infra/environments/prod && terraform init \
+		-backend-config="bucket=$(PROJECT_PREFIX)-terraform-state-prod-$(VERSION_SUFFIX)" \
+		-backend-config="prefix=prod/terraform.tfstate"
 
 # Check required environment variables
 .PHONY: check-env

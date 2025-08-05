@@ -4,8 +4,8 @@
 set -euo pipefail
 
 # Configuration
-PROJECT_PREFIX="${PROJECT_PREFIX:-rh-urlshort}"
-REGION="${REGION:-europe-west1}"
+PROJECT_PREFIX="${PROJECT_PREFIX:-}"
+REGION="${REGION:-}"
 ORG_ID="${ORG_ID:-}"
 BILLING_ACCOUNT="${BILLING_ACCOUNT:-}"
 FOLDER_ID="${FOLDER_ID:-}"
@@ -176,12 +176,6 @@ update_config() {
     else
         log_info ".env file already exists, skipping"
     fi
-
-    # Update bucket names in backend configs
-    sed -i.bak "s/bucket = \"urlshort-terraform-state-dev\"/bucket = \"${PROJECT_PREFIX}-terraform-state-dev\"/" \
-        infra/environments/dev/main.tf
-    sed -i.bak "s/bucket = \"urlshort-terraform-state-prod\"/bucket = \"${PROJECT_PREFIX}-terraform-state-prod\"/" \
-        infra/environments/prod/main.tf
 
     log_info "Configuration files updated"
 }

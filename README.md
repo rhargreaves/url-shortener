@@ -82,71 +82,10 @@ Organization
 
 ## Quick Start
 
-### 1. Initial Setup
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd url-shortener
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your actual GCP values
-
-# Source environment variables
-source .env
-
-# Run setup script
-chmod +x scripts/setup.sh
-./scripts/setup.sh
-```
-
-### 2. Configure GitHub Secrets
-
-Set up repository secrets for GitHub Actions:
-
-```bash
-# Required secrets in GitHub repository settings:
-GCP_ORG_ID              # Your GCP Organization ID
-GCP_BILLING_ACCOUNT     # Your Billing Account ID
-DOMAIN_NAME             # Your domain (e.g., go.r19s.net)
-GCP_FOLDER_ID           # GCP Folder ID (optional, can be empty)
-GCP_SA_KEY              # Service Account JSON key
-GCP_PROJECT_ID          # Default project for gcloud commands
-```
-
-### 3. Deploy Infrastructure
-
-**Using GitHub Actions (Recommended):**
-```bash
-# Push to main branch - automatically deploys to dev
-git add .
-git commit -m "Initial infrastructure setup"
-git push origin main
-
-# For production: Use GitHub UI workflow dispatch
-# Go to Actions → Deploy Production Infrastructure → Run workflow
-```
-
-**Using Local Make Commands:**
-```bash
-# Local deployment (requires gcloud setup)
-make plan-dev    # Review the plan
-make apply-dev   # Apply changes
-```
-
-### 4. Deploy Application
-
-```bash
-# Get cluster credentials
-make get-credentials-dev
-
-# Deploy to development
-kubectl apply -f k8s/
-
-# Check deployment status
-make status
-```
+1. **Initial Setup** - Run `./scripts/setup.sh` to create GCP projects and infrastructure
+2. **Configure GitHub Actions** - Run `./scripts/setup-github-actions-sa.sh` and add the generated service account key to GitHub secrets
+3. **Deploy Infrastructure** - Push to main branch for automatic dev deployment, use GitHub Actions workflow dispatch for production
+4. **Deploy Application** - Use `kubectl apply -f k8s/` after getting cluster credentials with `make get-credentials-dev`
 
 ## Key Features
 
@@ -176,45 +115,24 @@ make status
 - Multi-zone deployment for high availability
 
 ### 🔄 CI/CD Integration
-- **GitHub Actions workflows** for infrastructure and applications
-- **Comprehensive security scanning** (Terraform, containers, dependencies)
-- **Environment protection** with manual approvals for production
-- **Automated dev deployment** with manual production promotion
+
+The project uses GitHub Actions for automated CI/CD pipelines that provide infrastructure deployment, application builds, and comprehensive security scanning. The workflows follow enterprise patterns with environment protection and approval gates for production deployments.
+
+**Active Workflows:**
+- **Terraform Development** - Automatically deploys infrastructure changes to dev environment on main branch pushes
+- **Terraform Production** - Deploys infrastructure to production with manual approval after successful dev deployment
+- **Build and Deploy** - Builds container images, performs security scanning, and deploys applications to both environments
+- **Security Scanning** - Runs daily security scans using Checkov, TruffleHog, Hadolint, Trivy, and Polaris
+
+**Key Features:**
+- Automatic dev deployment with manual production approval
+- Comprehensive security scanning integrated into all workflows
+- Environment protection with GitHub environments and required reviewers
+- Terraform plan outputs posted as PR comments for review
 
 ## Configuration
 
-### Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `ORG_ID` | GCP Organization ID | Yes |
-| `BILLING_ACCOUNT` | Billing Account ID | Yes |
-| `PROJECT_PREFIX` | Prefix for project names | No |
-| `REGION` | Primary GCP region | No |
-
-### Configuration Approach
-
-This infrastructure uses **explicit configuration** - no default values are provided. All variables must be intentionally set:
-
-**Required Environment Variables** (via `TF_VAR_`):
-```bash
-export TF_VAR_organization_id="123456789012"
-export TF_VAR_billing_account="012345-678901-234567"
-export TF_VAR_domain_name="go.r19s.net"
-export TF_VAR_folder_id=""  # Empty if not using folders
-```
-
-**Explicit terraform.tfvars Configuration**:
-```hcl
-environment = "dev"  # or "prod"
-project_prefix = "urlshort"
-region = "europe-west1"
-zones = ["europe-west1-b", "europe-west1-c", "europe-west1-d"]
-enable_istio = true
-enable_autopilot = true
-node_count = 1  # dev: 1, prod: 3
-machine_type = "e2-standard-2"  # dev: e2-standard-2, prod: e2-standard-4
-```
+Configuration uses explicit environment variables and terraform.tfvars files. Required variables include GCP organization ID, billing account, domain name, and optional folder ID. Environment-specific settings are defined in `infra/environments/*/terraform.tfvars`.
 
 ## Security Considerations
 
@@ -258,48 +176,7 @@ machine_type = "e2-standard-2"  # dev: e2-standard-2, prod: e2-standard-4
 
 ## Operations
 
-### Common Commands
-
-```bash
-# Infrastructure
-make plan-dev          # Plan development changes
-make apply-dev         # Apply development changes
-make destroy-dev       # Destroy development environment
-
-# Application
-make build            # Build Docker image
-make deploy-dev       # Deploy to development
-make logs             # View application logs
-make port-forward     # Port forward for local access
-
-# Monitoring
-make status           # Check deployment status
-kubectl get pods -n url-shortener
-kubectl logs -f deployment/url-shortener -n url-shortener
-```
-
-### Troubleshooting
-
-1. **Terraform Issues**:
-   ```bash
-   make validate         # Validate configuration
-   make lint            # Lint Terraform files
-   terraform refresh    # Refresh state
-   ```
-
-2. **GKE Issues**:
-   ```bash
-   kubectl describe pods -n url-shortener
-   kubectl get events -n url-shortener
-   kubectl logs -f deployment/url-shortener -n url-shortener
-   ```
-
-3. **Istio Issues**:
-   ```bash
-   istioctl proxy-status
-   istioctl analyze
-   kubectl logs -f deployment/istiod -n istio-system
-   ```
+Common operations include `make plan-dev`, `make apply-dev` for infrastructure changes, and `kubectl` commands for application management. Use `make status` to check deployment status and standard Kubernetes/Istio troubleshooting commands as needed.
 
 ## Cost Optimization
 
