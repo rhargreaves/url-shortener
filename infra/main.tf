@@ -191,11 +191,11 @@ module "logging_monitoring_config" {
   source = "./modules/logging-monitoring"
 
   logging_project_id = module.logging_monitoring.project_id
-  monitored_projects = [
-    module.app_project.project_id,
-    module.ci_project.project_id,
-    module.shared_network.project_id
-  ]
+  monitored_projects = {
+    app            = module.app_project.project_id
+    ci             = module.ci_project.project_id
+    shared_network = module.shared_network.project_id
+  }
 
   labels = local.common_labels
 

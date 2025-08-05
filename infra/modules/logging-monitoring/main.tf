@@ -1,6 +1,6 @@
 # Log sink for centralized logging
 resource "google_logging_project_sink" "app_logs" {
-  for_each = toset(var.monitored_projects)
+  for_each = var.monitored_projects
 
   project     = each.value
   name        = "url-shortener-app-logs"
@@ -18,7 +18,7 @@ resource "google_logging_project_sink" "app_logs" {
 
 # Log sink for security events
 resource "google_logging_project_sink" "security_logs" {
-  for_each = toset(var.monitored_projects)
+  for_each = var.monitored_projects
 
   project     = each.value
   name        = "url-shortener-security-logs"
@@ -35,7 +35,7 @@ resource "google_logging_project_sink" "security_logs" {
 
 # Log sink for performance metrics
 resource "google_logging_project_sink" "performance_logs" {
-  for_each = toset(var.monitored_projects)
+  for_each = var.monitored_projects
 
   project     = each.value
   name        = "url-shortener-performance-logs"

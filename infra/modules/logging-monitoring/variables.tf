@@ -4,8 +4,8 @@ variable "logging_project_id" {
 }
 
 variable "monitored_projects" {
-  description = "List of project IDs to monitor"
-  type        = list(string)
+  description = "Map of project IDs to monitor with static keys"
+  type        = map(string)
 }
 
 variable "region" {
