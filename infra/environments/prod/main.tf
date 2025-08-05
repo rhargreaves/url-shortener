@@ -3,7 +3,7 @@ terraform {
 
   # Configure backend for state management
   backend "gcs" {
-    bucket = "urlshort-terraform-state-prod" # Replace with your bucket
+    bucket = "rh-urlshort-terraform-state-prod-v1" # Replace with your bucket
     prefix = "prod/terraform.tfstate"
   }
 

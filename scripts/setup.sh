@@ -104,14 +104,14 @@ create_state_buckets() {
     log_info "Creating Terraform state buckets..."
 
     gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" \
-        "gs://${PROJECT_PREFIX}-terraform-state-dev" 2>/dev/null || true
+        "gs://${PROJECT_PREFIX}-terraform-state-dev-${VERSION_SUFFIX}" 2>/dev/null || true
 
     gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" \
-        "gs://${PROJECT_PREFIX}-terraform-state-prod" 2>/dev/null || true
+        "gs://${PROJECT_PREFIX}-terraform-state-prod-${VERSION_SUFFIX}" 2>/dev/null || true
 
     # Enable versioning
-    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-dev"
-    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-prod"
+    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-dev-${VERSION_SUFFIX}"
+    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-prod-${VERSION_SUFFIX}"
 
     log_info "Terraform state buckets created"
 }
