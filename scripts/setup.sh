@@ -66,10 +66,17 @@ setup_auth() {
     if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q .; then
         log_info "No active gcloud authentication found. Please run 'gcloud auth login'"
         gcloud auth login
+    else
+        log_info "Active gcloud authentication found"
     fi
 
-    # Enable application default credentials
-    gcloud auth application-default login
+    # Check if application default credentials exist
+    if ! gcloud auth application-default print-access-token >/dev/null 2>&1; then
+        log_info "No application default credentials found. Setting up..."
+        gcloud auth application-default login
+    else
+        log_info "Application default credentials already configured"
+    fi
 
     log_info "Authentication setup complete"
 }
@@ -78,14 +85,19 @@ setup_auth() {
 create_state_projects() {
     log_info "Creating projects for Terraform state management..."
 
-    # Create shared network project for state buckets
-
-    if [[ -n "$FOLDER_ID" && "$FOLDER_ID" != "" ]]; then
-        gcloud projects create "$PROJECT_SHARED_NETWORK_ID" \
-            --folder="$FOLDER_ID"
+    # Check if shared network project already exists
+    if gcloud projects describe "$PROJECT_SHARED_NETWORK_ID" >/dev/null 2>&1; then
+        log_info "Project $PROJECT_SHARED_NETWORK_ID already exists"
     else
-        gcloud projects create "$PROJECT_SHARED_NETWORK_ID" \
-            --organization="$ORG_ID"
+        log_info "Creating project $PROJECT_SHARED_NETWORK_ID"
+
+        if [[ -n "$FOLDER_ID" && "$FOLDER_ID" != "" ]]; then
+            gcloud projects create "$PROJECT_SHARED_NETWORK_ID" \
+                --folder="$FOLDER_ID"
+        else
+            gcloud projects create "$PROJECT_SHARED_NETWORK_ID" \
+                --organization="$ORG_ID"
+        fi
     fi
 
     # Link billing account
@@ -96,24 +108,37 @@ create_state_projects() {
     gcloud services enable storage.googleapis.com \
         --project="$PROJECT_SHARED_NETWORK_ID"
 
-    log_info "State management projects created"
+    log_info "State management projects setup complete"
 }
 
 # Create Terraform state buckets
 create_state_buckets() {
     log_info "Creating Terraform state buckets..."
 
-    gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" \
-        "gs://${PROJECT_PREFIX}-terraform-state-dev-${VERSION_SUFFIX}" 2>/dev/null || true
+    local dev_bucket="gs://${PROJECT_PREFIX}-terraform-state-dev-${VERSION_SUFFIX}"
+    local prod_bucket="gs://${PROJECT_PREFIX}-terraform-state-prod-${VERSION_SUFFIX}"
 
-    gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" \
-        "gs://${PROJECT_PREFIX}-terraform-state-prod-${VERSION_SUFFIX}" 2>/dev/null || true
+    # Check and create dev bucket
+    if gsutil ls "$dev_bucket" >/dev/null 2>&1; then
+        log_info "Dev bucket $dev_bucket already exists"
+    else
+        log_info "Creating dev bucket $dev_bucket"
+        gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" "$dev_bucket"
+    fi
+
+    # Check and create prod bucket
+    if gsutil ls "$prod_bucket" >/dev/null 2>&1; then
+        log_info "Prod bucket $prod_bucket already exists"
+    else
+        log_info "Creating prod bucket $prod_bucket"
+        gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" "$prod_bucket"
+    fi
 
     # Enable versioning
-    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-dev-${VERSION_SUFFIX}"
-    gsutil versioning set on "gs://${PROJECT_PREFIX}-terraform-state-prod-${VERSION_SUFFIX}"
+    gsutil versioning set on "$dev_bucket"
+    gsutil versioning set on "$prod_bucket"
 
-    log_info "Terraform state buckets created"
+    log_info "Terraform state buckets setup complete"
 }
 
 # Initialize Terraform

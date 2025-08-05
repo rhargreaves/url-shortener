@@ -1,9 +1,8 @@
 terraform {
   required_version = ">= 1.0"
 
-  # Configure backend for state management
   backend "gcs" {
-    bucket = "rh-urlshort-terraform-state-prod-v1" # Replace with your bucket
+    bucket = "rh-urlshort-terraform-state-prod-v2"
     prefix = "prod/terraform.tfstate"
   }
 
