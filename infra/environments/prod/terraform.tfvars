@@ -19,6 +19,7 @@ zones  = ["europe-west1-b", "europe-west1-c", "europe-west1-d"]
 # GKE configuration for production
 enable_autopilot = true
 enable_istio     = true
+version_suffix   = "v1"
 
 # Production-specific settings (if using standard GKE)
 node_count   = 3

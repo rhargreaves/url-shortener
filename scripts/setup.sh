@@ -4,10 +4,14 @@
 set -euo pipefail
 
 # Configuration
-PROJECT_PREFIX="${PROJECT_PREFIX:-urlshort}"
-REGION="${REGION:-us-central1}"
+PROJECT_PREFIX="${PROJECT_PREFIX:-rh-urlshort}"
+REGION="${REGION:-europe-west1}"
 ORG_ID="${ORG_ID:-}"
 BILLING_ACCOUNT="${BILLING_ACCOUNT:-}"
+FOLDER_ID="${FOLDER_ID:-}"
+
+VERSION_SUFFIX="${VERSION_SUFFIX:-v2}"
+PROJECT_SHARED_NETWORK_ID="${PROJECT_PREFIX}-shared-network-${VERSION_SUFFIX}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -46,6 +50,12 @@ check_prerequisites() {
         exit 1
     fi
 
+    if [[ -n "$FOLDER_ID" ]]; then
+        log_info "Using folder: $FOLDER_ID"
+    else
+        log_info "Using organization: $ORG_ID"
+    fi
+
     log_info "Prerequisites check passed"
 }
 
@@ -69,17 +79,22 @@ create_state_projects() {
     log_info "Creating projects for Terraform state management..."
 
     # Create shared network project for state buckets
-    gcloud projects create "${PROJECT_PREFIX}-shared-network" \
-        --organization="$ORG_ID" \
-        --name="URL Shortener - Shared Network" || true
+
+    if [[ -n "$FOLDER_ID" && "$FOLDER_ID" != "" ]]; then
+        gcloud projects create "$PROJECT_SHARED_NETWORK_ID" \
+            --folder="$FOLDER_ID"
+    else
+        gcloud projects create "$PROJECT_SHARED_NETWORK_ID" \
+            --organization="$ORG_ID"
+    fi
 
     # Link billing account
-    gcloud billing projects link "${PROJECT_PREFIX}-shared-network" \
+    gcloud billing projects link "$PROJECT_SHARED_NETWORK_ID" \
         --billing-account="$BILLING_ACCOUNT"
 
     # Enable required APIs
     gcloud services enable storage.googleapis.com \
-        --project="${PROJECT_PREFIX}-shared-network"
+        --project="$PROJECT_SHARED_NETWORK_ID"
 
     log_info "State management projects created"
 }
@@ -88,10 +103,10 @@ create_state_projects() {
 create_state_buckets() {
     log_info "Creating Terraform state buckets..."
 
-    gsutil mb -p "${PROJECT_PREFIX}-shared-network" \
+    gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" \
         "gs://${PROJECT_PREFIX}-terraform-state-dev" 2>/dev/null || true
 
-    gsutil mb -p "${PROJECT_PREFIX}-shared-network" \
+    gsutil mb -p "$PROJECT_SHARED_NETWORK_ID" \
         "gs://${PROJECT_PREFIX}-terraform-state-prod" 2>/dev/null || true
 
     # Enable versioning

@@ -10,7 +10,7 @@
 environment = "dev"
 
 # Project naming
-project_prefix = "urlshort"
+project_prefix = "rh-urlshort"
 
 # Regional configuration
 region = "europe-west1"
@@ -19,6 +19,7 @@ zones  = ["europe-west1-b", "europe-west1-c", "europe-west1-d"]
 # GKE configuration for development
 enable_autopilot = true
 enable_istio     = true
+version_suffix   = "v1"
 
 # Development-specific settings (if using standard GKE)
 node_count   = 1

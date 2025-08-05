@@ -3,11 +3,6 @@ variable "project_id" {
   type        = string
 }
 
-variable "project_name" {
-  description = "Project display name"
-  type        = string
-}
-
 variable "organization_id" {
   description = "Organization ID"
   type        = string

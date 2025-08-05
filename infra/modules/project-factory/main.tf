@@ -5,7 +5,7 @@ resource "random_string" "project_suffix" {
 }
 
 resource "google_project" "project" {
-  name            = var.project_name
+  name            = "${var.project_id}-${random_string.project_suffix.result}"
   project_id      = "${var.project_id}-${random_string.project_suffix.result}"
   org_id          = var.folder_id == null || var.folder_id == "" ? var.organization_id : null
   folder_id       = var.folder_id == "" ? null : var.folder_id

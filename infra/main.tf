@@ -1,13 +1,13 @@
 locals {
   environment_projects = {
-    app = "${var.project_prefix}-${var.environment}-app"
-    ci  = "${var.project_prefix}-${var.environment}-ci"
+    app = "${var.project_prefix}-${var.environment}-app-${var.version_suffix}"
+    ci  = "${var.project_prefix}-${var.environment}-ci-${var.version_suffix}"
   }
 
   shared_projects = {
-    network            = "${var.project_prefix}-shared-network"
-    security           = "${var.project_prefix}-security"
-    logging_monitoring = "${var.project_prefix}-logging-monitoring"
+    network            = "${var.project_prefix}-shared-network-${var.version_suffix}"
+    security           = "${var.project_prefix}-security-${var.version_suffix}"
+    logging_monitoring = "${var.project_prefix}-logging-monitoring-${var.version_suffix}"
   }
 
   common_labels = {
@@ -22,7 +22,6 @@ module "shared_network" {
   source = "./modules/project-factory"
 
   project_id      = local.shared_projects.network
-  project_name    = "URL Shortener - Shared Network"
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id
@@ -43,7 +42,6 @@ module "security" {
   source = "./modules/project-factory"
 
   project_id      = local.shared_projects.security
-  project_name    = "URL Shortener - Security"
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id
@@ -64,7 +62,6 @@ module "logging_monitoring" {
   source = "./modules/project-factory"
 
   project_id      = local.shared_projects.logging_monitoring
-  project_name    = "URL Shortener - Logging & Monitoring"
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id
@@ -85,7 +82,6 @@ module "app_project" {
   source = "./modules/project-factory"
 
   project_id      = local.environment_projects.app
-  project_name    = "URL Shortener - ${title(var.environment)} App"
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id
@@ -112,7 +108,6 @@ module "ci_project" {
   source = "./modules/project-factory"
 
   project_id      = local.environment_projects.ci
-  project_name    = "URL Shortener - ${title(var.environment)} CI"
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id

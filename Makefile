@@ -1,7 +1,7 @@
 # URL Shortener Infrastructure Management
 
 # Configuration
-PROJECT_PREFIX := urlshort
+PROJECT_PREFIX := rh-urlshort
 REGION := europe-west1
 ORG_ID := 123456789012
 BILLING_ACCOUNT := 012345-678901-234567

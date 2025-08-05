@@ -45,4 +45,5 @@ module "infrastructure" {
   enable_autopilot = var.enable_autopilot
   node_count       = var.node_count
   machine_type     = var.machine_type
+  version_suffix   = var.version_suffix
 }
