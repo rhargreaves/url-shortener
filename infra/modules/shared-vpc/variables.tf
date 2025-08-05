@@ -14,9 +14,9 @@ variable "zones" {
 }
 
 variable "service_projects" {
-  description = "List of service project IDs to attach to shared VPC"
-  type        = list(string)
-  default     = []
+  description = "Map of service project IDs to attach to shared VPC with static keys"
+  type        = map(string)
+  default     = {}
 }
 
 variable "labels" {

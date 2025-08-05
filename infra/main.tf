@@ -134,10 +134,10 @@ module "shared_vpc" {
   zones      = var.zones
 
   # Service projects that will use the shared VPC
-  service_projects = [
-    module.app_project.project_id,
-    module.ci_project.project_id
-  ]
+  service_projects = {
+    app = module.app_project.project_id
+    ci  = module.ci_project.project_id
+  }
 
   labels = local.common_labels
 
