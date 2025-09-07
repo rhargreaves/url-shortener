@@ -3,16 +3,6 @@ variable "security_project_id" {
   type        = string
 }
 
-variable "app_project_id" {
-  description = "Application project ID"
-  type        = string
-}
-
-variable "ci_project_id" {
-  description = "CI project ID"
-  type        = string
-}
-
 variable "organization_id" {
   description = "GCP Organization ID"
   type        = string

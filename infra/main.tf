@@ -1,23 +1,20 @@
 locals {
   environment_projects = {
-    app = "${var.project_prefix}-${var.environment}-app-${var.version_suffix}"
-    ci  = "${var.project_prefix}-${var.environment}-ci-${var.version_suffix}"
+    app     = "${var.project_prefix}-${var.environment}-app-${var.version_suffix}"
+    network = "${var.project_prefix}-shared-network-${var.version_suffix}"
   }
 
   shared_projects = {
-    network            = "${var.project_prefix}-shared-network-${var.version_suffix}"
     security           = "${var.project_prefix}-security-${var.version_suffix}"
-    logging_monitoring = "${var.project_prefix}-logging-monitoring-${var.version_suffix}"
+    logging_monitoring = "${var.project_prefix}-monitoring-${var.version_suffix}"
   }
 
   common_labels = {
     environment = var.environment
-    project     = "url-shortener"
     managed_by  = "terraform"
   }
 }
 
-# Shared Network Project
 module "shared_network" {
   source = "./modules/project-factory"
 
@@ -37,47 +34,6 @@ module "shared_network" {
   labels = local.common_labels
 }
 
-# Security Project
-module "security" {
-  source = "./modules/project-factory"
-
-  project_id      = local.shared_projects.security
-  organization_id = var.organization_id
-  billing_account = var.billing_account
-  folder_id       = var.folder_id
-
-  services = [
-    "securitycenter.googleapis.com",
-    "cloudkms.googleapis.com",
-    "secretmanager.googleapis.com",
-    "cloudasset.googleapis.com",
-    "policytroubleshooter.googleapis.com"
-  ]
-
-  labels = local.common_labels
-}
-
-# Logging and Monitoring Project
-module "logging_monitoring" {
-  source = "./modules/project-factory"
-
-  project_id      = local.shared_projects.logging_monitoring
-  organization_id = var.organization_id
-  billing_account = var.billing_account
-  folder_id       = var.folder_id
-
-  services = [
-    "logging.googleapis.com",
-    "monitoring.googleapis.com",
-    "cloudtrace.googleapis.com",
-    "cloudprofiler.googleapis.com",
-    "clouderrorreporting.googleapis.com"
-  ]
-
-  labels = local.common_labels
-}
-
-# Application Project
 module "app_project" {
   source = "./modules/project-factory"
 
@@ -103,29 +59,6 @@ module "app_project" {
   })
 }
 
-# CI/CD Project
-module "ci_project" {
-  source = "./modules/project-factory"
-
-  project_id      = local.environment_projects.ci
-  organization_id = var.organization_id
-  billing_account = var.billing_account
-  folder_id       = var.folder_id
-
-  services = [
-    "cloudbuild.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "sourcerepo.googleapis.com",
-    "containeranalysis.googleapis.com",
-    "binaryauthorization.googleapis.com"
-  ]
-
-  labels = merge(local.common_labels, {
-    tier = "cicd"
-  })
-}
-
-# Shared VPC Network
 module "shared_vpc" {
   source = "./modules/shared-vpc"
 
@@ -136,7 +69,6 @@ module "shared_vpc" {
   # Service projects that will use the shared VPC
   service_projects = {
     app = module.app_project.project_id
-    ci  = module.ci_project.project_id
   }
 
   labels = local.common_labels
@@ -144,7 +76,6 @@ module "shared_vpc" {
   depends_on = [module.shared_network]
 }
 
-# GKE Cluster
 module "gke" {
   source = "./modules/gke"
 
@@ -161,43 +92,12 @@ module "gke" {
   services_range_name = module.shared_vpc.gke_services_range_name
   domain_name         = var.domain_name
 
-  enable_istio     = var.enable_istio
-  enable_autopilot = var.enable_autopilot
-  node_count       = var.node_count
-  machine_type     = var.machine_type
+  enable_istio     = true
+  enable_autopilot = true
+  node_count       = 3
+  machine_type     = "e2-standard-2"
 
   labels = local.common_labels
 
   depends_on = [module.app_project, module.shared_vpc]
-}
-
-# Security Configuration
-module "security_config" {
-  source = "./modules/security"
-
-  security_project_id = module.security.project_id
-  app_project_id      = module.app_project.project_id
-  ci_project_id       = module.ci_project.project_id
-
-  organization_id = var.organization_id
-
-  labels = local.common_labels
-
-  depends_on = [module.security, module.app_project, module.ci_project]
-}
-
-# Logging and Monitoring Configuration
-module "logging_monitoring_config" {
-  source = "./modules/logging-monitoring"
-
-  logging_project_id = module.logging_monitoring.project_id
-  monitored_projects = {
-    app            = module.app_project.project_id
-    ci             = module.ci_project.project_id
-    shared_network = module.shared_network.project_id
-  }
-
-  labels = local.common_labels
-
-  depends_on = [module.logging_monitoring]
 }

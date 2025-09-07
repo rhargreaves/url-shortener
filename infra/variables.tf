@@ -32,8 +32,8 @@ variable "environment" {
   description = "Environment name (dev, prod)"
   type        = string
   validation {
-    condition     = contains(["dev", "prod"], var.environment)
-    error_message = "Environment must be either 'dev' or 'prod'."
+    condition     = contains(["dev", "prod", "shared"], var.environment)
+    error_message = "Environment must be either 'dev' or 'prod' or 'shared'."
   }
 }
 
@@ -44,25 +44,5 @@ variable "project_prefix" {
 
 variable "domain_name" {
   description = "Domain name for the URL shortener (set via TF_VAR_domain_name)"
-  type        = string
-}
-
-variable "enable_istio" {
-  description = "Enable Istio service mesh on GKE clusters"
-  type        = bool
-}
-
-variable "enable_autopilot" {
-  description = "Use GKE Autopilot mode"
-  type        = bool
-}
-
-variable "node_count" {
-  description = "Number of nodes per zone (if not using Autopilot)"
-  type        = number
-}
-
-variable "machine_type" {
-  description = "Machine type for GKE nodes (if not using Autopilot)"
   type        = string
 }

@@ -1,47 +1,30 @@
-# URL Shortener Infrastructure Management
+ifeq ($(TERRAFORM_PROJECT_ID),)
+$(error TERRAFORM_PROJECT_ID is not set)
+endif
+ifeq ($(TERRAFORM_BUCKET_PREFIX),)
+$(error TERRAFORM_BUCKET_PREFIX is not set)
+endif
 
-# Help target
-.PHONY: help
-help:
-	@echo "Available targets:"
-			@echo "  help                 Show this help message"
-	@echo "  init                 Initialize Terraform backends"
-	@echo "  check-env           Check required environment variables"
-	@echo "  plan-dev            Plan development infrastructure"
-	@echo "  apply-dev           Apply development infrastructure"
-	@echo "  plan-prod           Plan production infrastructure"
-	@echo "  apply-prod          Apply production infrastructure"
-	@echo "  destroy-dev         Destroy development infrastructure"
-	@echo "  destroy-prod        Destroy production infrastructure"
-	@echo "  build               Build Docker image"
-	@echo "  deploy-dev          Deploy to development"
-	@echo "  deploy-prod         Deploy to production"
-	@echo "  lint                Lint Terraform files"
-	@echo "  validate            Validate Terraform configuration"
-	@echo "  security-scan       Run local security scans"
-	@echo "  clean               Clean up temporary files"
-	@echo ""
-	@echo "GitHub Actions:"
-	@echo "  - Push to main: Automatically deploys to dev"
-	@echo "  - Manual prod deploy: Use GitHub UI workflow dispatch"
-	@echo "  - Security scans: Run automatically on push/PR"
-
-# Initialize Terraform backends
-.PHONY: init
 init:
 	@echo "Creating Terraform state buckets..."
-	gsutil mb -p $(PROJECT_PREFIX)-shared-network gs://$(PROJECT_PREFIX)-terraform-state-dev || true
-	gsutil mb -p $(PROJECT_PREFIX)-shared-network gs://$(PROJECT_PREFIX)-terraform-state-prod || true
-	gsutil versioning set on gs://$(PROJECT_PREFIX)-terraform-state-dev
-	gsutil versioning set on gs://$(PROJECT_PREFIX)-terraform-state-prod
+	gsutil mb -p $(TERRAFORM_PROJECT_ID) gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-dev || true
+	gsutil mb -p $(TERRAFORM_PROJECT_ID) gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-prod || true
+	gsutil mb -p $(TERRAFORM_PROJECT_ID) gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-shared || true
+	gsutil versioning set on gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-dev
+	gsutil versioning set on gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-prod
+	gsutil versioning set on gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-shared
 	@echo "Initializing Terraform..."
 	cd infra && terraform init
-	cd infra/environments/dev && terraform init \
-		-backend-config="bucket=$(PROJECT_PREFIX)-terraform-state-dev-$(VERSION_SUFFIX)" \
+	cd infra/environments/shared && terraform init -upgrade \
+			-backend-config="bucket=$(TERRAFORM_BUCKET_PREFIX)-terraform-state-shared" \
+			-backend-config="prefix=shared/terraform.tfstate"
+	cd infra/environments/dev && terraform init -upgrade \
+		-backend-config="bucket=$(TERRAFORM_BUCKET_PREFIX)-terraform-state-dev" \
 		-backend-config="prefix=dev/terraform.tfstate"
-	cd infra/environments/prod && terraform init \
-		-backend-config="bucket=$(PROJECT_PREFIX)-terraform-state-prod-$(VERSION_SUFFIX)" \
+	cd infra/environments/prod && terraform init -upgrade \
+		-backend-config="bucket=$(TERRAFORM_BUCKET_PREFIX)-terraform-state-prod" \
 		-backend-config="prefix=prod/terraform.tfstate"
+.PHONY: init
 
 # Check required environment variables
 .PHONY: check-env
@@ -63,6 +46,21 @@ check-env:
 	fi
 	@echo "✅ Required environment variables are set"
 	@echo "ℹ️  Optional: Set TF_VAR_folder_id if using GCP folders"
+
+# Shared environment
+.PHONY: plan-shared
+plan-shared: check-env
+	@echo "🔧 Configuring shared environment..."
+	@source scripts/env-shared.sh && cd infra/environments/shared && terraform plan -var-file=terraform.tfvars
+
+.PHONY: apply-shared
+apply-shared: check-env
+	@echo "🔧 Configuring shared environment..."
+	@source scripts/env-shared.sh && cd infra/environments/shared && terraform apply -var-file=terraform.tfvars -auto-approve
+
+.PHONY: destroy-shared
+destroy-shared:
+	cd infra/environments/shared && terraform destroy -var-file=terraform.tfvars -auto-approve
 
 # Development environment
 .PHONY: plan-dev

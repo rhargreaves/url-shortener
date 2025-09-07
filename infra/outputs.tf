@@ -13,16 +13,6 @@ output "logging_monitoring_project_id" {
   value       = module.logging_monitoring.project_id
 }
 
-output "app_project_id" {
-  description = "Application project ID"
-  value       = module.app_project.project_id
-}
-
-output "ci_project_id" {
-  description = "CI/CD project ID"
-  value       = module.ci_project.project_id
-}
-
 output "gke_cluster_name" {
   description = "GKE cluster name"
   value       = module.gke.cluster_name
