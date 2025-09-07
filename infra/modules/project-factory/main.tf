@@ -14,6 +14,7 @@ resource "google_project" "project" {
   labels = var.labels
 
   auto_create_network = false
+  deletion_policy     = "DELETE"
 }
 
 resource "google_project_service" "project_services" {

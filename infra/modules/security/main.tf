@@ -13,10 +13,6 @@ resource "google_kms_crypto_key" "database_key" {
 
   rotation_period = "7776000s" # 90 days
 
-  lifecycle {
-    prevent_destroy = true
-  }
-
   labels = var.labels
 }
 
@@ -27,10 +23,6 @@ resource "google_kms_crypto_key" "secrets_key" {
   purpose  = "ENCRYPT_DECRYPT"
 
   rotation_period = "7776000s" # 90 days
-
-  lifecycle {
-    prevent_destroy = true
-  }
 
   labels = var.labels
 }
