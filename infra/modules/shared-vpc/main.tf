@@ -218,3 +218,11 @@ resource "google_project_iam_member" "gke_network_user" {
   role    = "roles/compute.networkUser"
   member  = "serviceAccount:service-${data.google_project.service_project[each.key].number}@container-engine-robot.iam.gserviceaccount.com"
 }
+
+resource "google_project_iam_member" "cloud_services_network_user" {
+  for_each = var.service_projects
+
+  project = var.project_id
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${data.google_project.service_project[each.key].number}@cloudservices.gserviceaccount.com"
+}

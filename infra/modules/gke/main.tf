@@ -4,24 +4,22 @@ locals {
   ]
 }
 
-# Get GKE release channel and version
 data "google_container_engine_versions" "gke_version" {
   location = var.region
   project  = var.project_id
 }
 
-# GKE Cluster
 resource "google_container_cluster" "primary" {
   project  = var.project_id
   name     = var.cluster_name
   location = var.region
 
-  # Network configuration
   network         = var.network
   subnetwork      = "projects/${var.network_project_id}/regions/${var.region}/subnetworks/gke-subnet"
   networking_mode = "VPC_NATIVE"
 
-  # Use Shared VPC
+  deletion_protection = false
+
   network_policy {
     enabled  = true
     provider = "CALICO"
@@ -32,7 +30,6 @@ resource "google_container_cluster" "primary" {
     services_secondary_range_name = var.services_range_name
   }
 
-  # Security configurations
   private_cluster_config {
     enable_private_nodes    = true
     enable_private_endpoint = false
@@ -50,7 +47,6 @@ resource "google_container_cluster" "primary" {
     }
   }
 
-  # Addons
   addons_config {
     http_load_balancing {
       disabled = false
@@ -75,24 +71,18 @@ resource "google_container_cluster" "primary" {
     gcs_fuse_csi_driver_config {
       enabled = true
     }
-
-
   }
 
-  # Workload Identity
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
 
-  # Shielded nodes
   enable_shielded_nodes = true
 
-  # Binary Authorization
   binary_authorization {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
 
-  # Network tags for firewall rules
   node_config {
     machine_type = var.machine_type
     disk_size_gb = 100
@@ -116,22 +106,18 @@ resource "google_container_cluster" "primary" {
     labels = var.labels
   }
 
-  # Resource labels
   resource_labels = var.labels
 
-  # Initial node count (will be managed by node pool)
   remove_default_node_pool = true
   initial_node_count       = 1
 
   logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
 
-  # Release channel
   release_channel {
     channel = "REGULAR"
   }
 
-  # Maintenance policy
   maintenance_policy {
     daily_maintenance_window {
       start_time = "03:00"
@@ -153,7 +139,6 @@ resource "google_container_node_pool" "primary_nodes" {
   cluster    = google_container_cluster.primary.name
   node_count = var.node_count
 
-  # Node configuration
   node_config {
     preemptible  = false
     machine_type = var.machine_type
@@ -178,26 +163,22 @@ resource "google_container_node_pool" "primary_nodes" {
     labels = var.labels
   }
 
-  # Autoscaling
   autoscaling {
     min_node_count = 1
     max_node_count = 10
   }
 
-  # Upgrade settings
   upgrade_settings {
     max_surge       = 1
     max_unavailable = 0
   }
 
-  # Management
   management {
     auto_repair  = true
     auto_upgrade = true
   }
 }
 
-# Service account for GKE nodes
 resource "google_service_account" "gke_sa" {
   project    = var.project_id
   account_id = "${var.cluster_name}-sa"
