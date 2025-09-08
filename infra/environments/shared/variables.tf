@@ -37,3 +37,8 @@ variable "project_prefix" {
   description = "Prefix for all project names"
   type        = string
 }
+
+variable "notification_email" {
+  description = "Email for monitoring notifications"
+  type        = string
+}

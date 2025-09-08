@@ -72,7 +72,6 @@ variable "machine_type" {
 variable "domain_name" {
   description = "Domain name for SSL certificate"
   type        = string
-  default     = "short.example.com"
 }
 
 variable "labels" {

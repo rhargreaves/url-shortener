@@ -5,13 +5,12 @@ locals {
   }
 
   shared_projects = {
-    security           = "${var.project_prefix}-security-${var.version_suffix}"
-    logging_monitoring = "${var.project_prefix}-monitoring-${var.version_suffix}"
+    security   = "${var.project_prefix}-security-${var.version_suffix}"
+    monitoring = "${var.project_prefix}-monitoring-${var.version_suffix}"
   }
 
   common_labels = {
     environment = var.environment
-    managed_by  = "terraform"
   }
 }
 

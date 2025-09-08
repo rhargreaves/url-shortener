@@ -8,9 +8,9 @@ output "security_project_id" {
   value       = module.security.project_id
 }
 
-output "logging_monitoring_project_id" {
-  description = "Logging and monitoring project ID"
-  value       = module.logging_monitoring.project_id
+output "monitoring_project_id" {
+  description = "Monitoring project ID"
+  value       = module.monitoring.project_id
 }
 
 output "gke_cluster_name" {

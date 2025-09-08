@@ -1,5 +1,5 @@
-variable "logging_project_id" {
-  description = "Logging and monitoring project ID"
+variable "monitoring_project_id" {
+  description = "Monitoring project ID"
   type        = string
 }
 
@@ -11,19 +11,11 @@ variable "monitored_projects" {
 variable "region" {
   description = "GCP region"
   type        = string
-  default     = "us-central1"
 }
 
 variable "notification_email" {
   description = "Email for monitoring notifications"
   type        = string
-  default     = "ops@example.com"
-}
-
-variable "service_domain" {
-  description = "Domain name for uptime checks"
-  type        = string
-  default     = "short.example.com"
 }
 
 variable "labels" {

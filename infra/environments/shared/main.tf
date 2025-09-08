@@ -18,8 +18,8 @@ provider "google" {
 
 locals {
   shared_projects = {
-    security           = "${var.project_prefix}-security"
-    logging_monitoring = "${var.project_prefix}-monitoring"
+    security   = "${var.project_prefix}-security"
+    monitoring = "${var.project_prefix}-monitoring"
   }
 
   common_labels = {
@@ -47,10 +47,10 @@ module "security" {
   labels = local.common_labels
 }
 
-module "logging_monitoring" {
+module "monitoring" {
   source = "../../modules/project-factory"
 
-  project_id      = local.shared_projects.logging_monitoring
+  project_id      = local.shared_projects.monitoring
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id
@@ -76,15 +76,17 @@ module "security_config" {
   depends_on = [module.security]
 }
 
-module "logging_monitoring_config" {
-  source = "../../modules/logging-monitoring"
+module "monitoring_config" {
+  source             = "../../modules/monitoring"
+  region             = var.region
+  notification_email = var.notification_email
 
-  logging_project_id = module.logging_monitoring.project_id
+  monitoring_project_id = module.monitoring.project_id
   monitored_projects = {
     security = module.security.project_id
   }
 
   labels = local.common_labels
 
-  depends_on = [module.logging_monitoring]
+  depends_on = [module.monitoring]
 }
