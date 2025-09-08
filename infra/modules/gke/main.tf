@@ -12,15 +12,13 @@ data "google_container_engine_versions" "gke_version" {
 
 # GKE Cluster
 resource "google_container_cluster" "primary" {
-  count = var.enable_autopilot ? 0 : 1
-
   project  = var.project_id
   name     = var.cluster_name
   location = var.region
 
   # Network configuration
   network         = var.network
-  subnetwork      = var.subnet
+  subnetwork      = "projects/${var.network_project_id}/regions/${var.region}/subnetworks/gke-subnet"
   networking_mode = "VPC_NATIVE"
 
   # Use Shared VPC
@@ -148,97 +146,11 @@ resource "google_container_cluster" "primary" {
   }
 }
 
-# GKE Autopilot Cluster
-resource "google_container_cluster" "autopilot" {
-  count = var.enable_autopilot ? 1 : 0
-
-  project  = var.project_id
-  name     = var.cluster_name
-  location = var.region
-
-  # Enable Autopilot
-  enable_autopilot = true
-
-  # Network configuration
-  network         = var.network
-  subnetwork      = var.subnet
-  networking_mode = "VPC_NATIVE"
-
-  ip_allocation_policy {
-    cluster_secondary_range_name  = var.pods_range_name
-    services_secondary_range_name = var.services_range_name
-  }
-
-  # Security configurations
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = "172.16.0.0/28"
-
-    master_global_access_config {
-      enabled = true
-    }
-  }
-
-  master_authorized_networks_config {
-    cidr_blocks {
-      cidr_block   = "10.0.0.0/8"
-      display_name = "VPC"
-    }
-  }
-
-  # Workload Identity
-  workload_identity_config {
-    workload_pool = "${var.project_id}.svc.id.goog"
-  }
-
-  # Binary Authorization
-  binary_authorization {
-    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
-  }
-
-  # Resource labels
-  resource_labels = var.labels
-
-  # Logging and monitoring
-  logging_config {
-    enable_components = [
-      "SYSTEM_COMPONENTS",
-      "WORKLOADS"
-    ]
-  }
-
-  monitoring_config {
-    enable_components = [
-      "SYSTEM_COMPONENTS"
-    ]
-
-    managed_prometheus {
-      enabled = true
-    }
-  }
-
-  # Release channel
-  release_channel {
-    channel = "REGULAR"
-  }
-
-  # Maintenance policy
-  maintenance_policy {
-    daily_maintenance_window {
-      start_time = "03:00"
-    }
-  }
-}
-
-# Node pool for standard GKE
 resource "google_container_node_pool" "primary_nodes" {
-  count = var.enable_autopilot ? 0 : 1
-
   project    = var.project_id
   name       = "${var.cluster_name}-node-pool"
   location   = var.region
-  cluster    = google_container_cluster.primary[0].name
+  cluster    = google_container_cluster.primary.name
   node_count = var.node_count
 
   # Node configuration

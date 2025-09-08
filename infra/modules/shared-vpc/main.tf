@@ -11,7 +11,6 @@ locals {
   }
 }
 
-# Create VPC network
 resource "google_compute_network" "vpc" {
   project                 = var.project_id
   name                    = "shared-vpc"
@@ -21,14 +20,12 @@ resource "google_compute_network" "vpc" {
   description = "Shared VPC for URL Shortener infrastructure"
 }
 
-# Enable shared VPC
 resource "google_compute_shared_vpc_host_project" "host" {
   project = var.project_id
 
   depends_on = [google_compute_network.vpc]
 }
 
-# Attach service projects to shared VPC
 resource "google_compute_shared_vpc_service_project" "service_projects" {
   for_each = var.service_projects
 
@@ -38,7 +35,6 @@ resource "google_compute_shared_vpc_service_project" "service_projects" {
   depends_on = [google_compute_shared_vpc_host_project.host]
 }
 
-# Application subnet
 resource "google_compute_subnetwork" "app_subnet" {
   project       = var.project_id
   name          = "app-subnet"
@@ -55,7 +51,6 @@ resource "google_compute_subnetwork" "app_subnet" {
   }
 }
 
-# GKE subnet with secondary ranges
 resource "google_compute_subnetwork" "gke_subnet" {
   project       = var.project_id
   name          = "gke-subnet"
@@ -82,7 +77,6 @@ resource "google_compute_subnetwork" "gke_subnet" {
   }
 }
 
-# CI/CD subnet
 resource "google_compute_subnetwork" "ci_subnet" {
   project       = var.project_id
   name          = "ci-subnet"
@@ -99,7 +93,6 @@ resource "google_compute_subnetwork" "ci_subnet" {
   }
 }
 
-# Cloud Router for Cloud NAT
 resource "google_compute_router" "router" {
   project = var.project_id
   name    = "shared-router"
@@ -109,7 +102,6 @@ resource "google_compute_router" "router" {
   description = "Router for Cloud NAT"
 }
 
-# Cloud NAT for outbound internet access
 resource "google_compute_router_nat" "nat" {
   project = var.project_id
   name    = "shared-nat"
@@ -125,7 +117,6 @@ resource "google_compute_router_nat" "nat" {
   }
 }
 
-# Firewall rules
 resource "google_compute_firewall" "allow_internal" {
   project = var.project_id
   name    = "allow-internal"
@@ -190,7 +181,6 @@ resource "google_compute_firewall" "allow_ssh_iap" {
   target_tags   = ["ssh-allowed"]
 }
 
-# DNS private zone for internal resolution
 resource "google_dns_managed_zone" "private_zone" {
   project     = var.project_id
   name        = "url-shortener-private"
@@ -206,4 +196,25 @@ resource "google_dns_managed_zone" "private_zone" {
   }
 
   labels = var.labels
+}
+
+resource "google_project_iam_member" "gke_host_service_agent" {
+  for_each = var.service_projects
+
+  project = var.project_id
+  role    = "roles/container.hostServiceAgentUser"
+  member  = "serviceAccount:service-${data.google_project.service_project[each.key].number}@container-engine-robot.iam.gserviceaccount.com"
+}
+
+data "google_project" "service_project" {
+  for_each   = var.service_projects
+  project_id = each.value
+}
+
+resource "google_project_iam_member" "gke_network_user" {
+  for_each = var.service_projects
+
+  project = var.project_id
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:service-${data.google_project.service_project[each.key].number}@container-engine-robot.iam.gserviceaccount.com"
 }

@@ -1,12 +1,7 @@
 locals {
   environment_projects = {
-    app     = "${var.project_prefix}-${var.environment}-app-${var.version_suffix}"
-    network = "${var.project_prefix}-shared-network-${var.version_suffix}"
-  }
-
-  shared_projects = {
-    security   = "${var.project_prefix}-security-${var.version_suffix}"
-    monitoring = "${var.project_prefix}-monitoring-${var.version_suffix}"
+    app     = "${var.project_prefix}-${var.environment}-app"
+    network = "${var.project_prefix}-sh-net"
   }
 
   common_labels = {
@@ -17,7 +12,7 @@ locals {
 module "shared_network" {
   source = "./modules/project-factory"
 
-  project_id      = local.shared_projects.network
+  project_id      = local.environment_projects.network
   organization_id = var.organization_id
   billing_account = var.billing_account
   folder_id       = var.folder_id
@@ -44,8 +39,6 @@ module "app_project" {
   services = [
     "container.googleapis.com",
     "compute.googleapis.com",
-    "cloudrun.googleapis.com",
-    "servicemesh.googleapis.com",
     "artifactregistry.googleapis.com",
     "redis.googleapis.com",
     "sqladmin.googleapis.com",

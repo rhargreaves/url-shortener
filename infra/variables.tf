@@ -13,11 +13,6 @@ variable "folder_id" {
   type        = string
 }
 
-variable "version_suffix" {
-  description = "Version suffix for project names"
-  type        = string
-}
-
 variable "region" {
   description = "Primary GCP region"
   type        = string

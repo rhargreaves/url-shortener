@@ -19,3 +19,6 @@ This project demonstrates a production-ready URL shortener service deployed on G
 
 ## Getting Started
 
+## TODO
+
+* Ensure Compute Shared VPC Role is granted to the service account

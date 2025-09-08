@@ -27,5 +27,4 @@ module "infrastructure" {
   environment     = var.environment
   project_prefix  = var.project_prefix
   domain_name     = var.domain_name
-  version_suffix  = var.version_suffix
 }

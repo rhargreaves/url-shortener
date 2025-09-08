@@ -42,8 +42,3 @@ variable "domain_name" {
   description = "Domain name for the URL shortener"
   type        = string
 }
-
-variable "version_suffix" {
-  description = "Version suffix for project names"
-  type        = string
-}

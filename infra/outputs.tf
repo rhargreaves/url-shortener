@@ -3,16 +3,6 @@ output "shared_network_project_id" {
   value       = module.shared_network.project_id
 }
 
-output "security_project_id" {
-  description = "Security project ID"
-  value       = module.security.project_id
-}
-
-output "monitoring_project_id" {
-  description = "Monitoring project ID"
-  value       = module.monitoring.project_id
-}
-
 output "gke_cluster_name" {
   description = "GKE cluster name"
   value       = module.gke.cluster_name
