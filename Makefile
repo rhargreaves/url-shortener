@@ -40,7 +40,7 @@ plan-shared:
 .PHONY: plan-shared
 
 apply-shared:
-	cd infra/environments/shared && terraform apply -var-file=terraform.tfvars -auto-approve tfplan
+	cd infra/environments/shared && terraform apply tfplan
 .PHONY: apply-shared
 
 destroy-shared:
