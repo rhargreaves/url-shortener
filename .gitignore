@@ -50,3 +50,5 @@ kubeconfig
 # Backup files
 *.bak
 *.backup
+
+tfplan

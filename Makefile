@@ -51,12 +51,12 @@ check-env:
 .PHONY: plan-shared
 plan-shared: check-env
 	@echo "🔧 Configuring shared environment..."
-	@source scripts/env-shared.sh && cd infra/environments/shared && terraform plan -var-file=terraform.tfvars
+	@source scripts/env-shared.sh && cd infra/environments/shared && terraform plan -var-file=terraform.tfvars -out=tfplan
 
 .PHONY: apply-shared
 apply-shared: check-env
 	@echo "🔧 Configuring shared environment..."
-	@source scripts/env-shared.sh && cd infra/environments/shared && terraform apply -var-file=terraform.tfvars -auto-approve
+	@source scripts/env-shared.sh && cd infra/environments/shared && terraform apply -var-file=terraform.tfvars -auto-approve tfplan
 
 .PHONY: destroy-shared
 destroy-shared:
