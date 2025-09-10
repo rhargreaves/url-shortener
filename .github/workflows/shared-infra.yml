@@ -89,20 +89,8 @@ jobs:
           search_artifacts: true
           if_no_artifact_found: fail
 
-      - name: Verify Plan File Exists
-        run: |
-          if [ ! -f "infra/environments/shared/tfplan" ]; then
-            echo "Error: Plan file not found at infra/environments/shared/tfplan"
-            echo "Contents of directory:"
-            ls -la infra/environments/shared/
-            exit 1
-          fi
-          echo "Plan file found successfully"
-
-      - name: Show Plan Summary
-        run: |
-          cd infra/environments/shared
-          terraform show -no-color tfplan | head -50
+      - name: Terraform Init
+        run: make init
 
       - name: Terraform Apply
         run: make apply-shared
