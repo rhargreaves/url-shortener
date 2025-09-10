@@ -45,6 +45,9 @@ jobs:
         with:
             project_id: ${{ secrets.GCP_TERRAFORM_PROJECT_ID }}
 
+      - name: Terraform Init
+        run: make init
+
       - name: Terraform Plan
         run: make plan-shared
 
