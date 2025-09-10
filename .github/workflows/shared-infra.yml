@@ -56,6 +56,8 @@ jobs:
         with:
           name: tfplan
           path: infra/environments/shared/tfplan
+          retention-days: 7
+          if-no-files-found: error
 
   apply:
     runs-on: ubuntu-latest
@@ -76,11 +78,31 @@ jobs:
         with:
             project_id: ${{ secrets.GCP_TERRAFORM_PROJECT_ID }}
 
-      - name: Download Plan
-        uses: actions/download-artifact@v4
+      - name: Download Plan from Previous Run
+        uses: dawidd6/action-download-artifact@v3
         with:
           name: tfplan
           path: infra/environments/shared/
+          workflow: shared-infra.yml
+          branch: main
+          event: push
+          search_artifacts: true
+          if_no_artifact_found: fail
+
+      - name: Verify Plan File Exists
+        run: |
+          if [ ! -f "infra/environments/shared/tfplan" ]; then
+            echo "Error: Plan file not found at infra/environments/shared/tfplan"
+            echo "Contents of directory:"
+            ls -la infra/environments/shared/
+            exit 1
+          fi
+          echo "Plan file found successfully"
+
+      - name: Show Plan Summary
+        run: |
+          cd infra/environments/shared
+          terraform show -no-color tfplan | head -50
 
       - name: Terraform Apply
         run: make apply-shared
