@@ -5,14 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      action:
-        description: "Terraform action to run"
-        required: true
-        type: choice
-        options:
-          - plan
-          - apply
 
 env:
   TF_VAR_organization_id: ${{ secrets.GCP_ORG_ID }}
@@ -28,7 +20,6 @@ env:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
     steps:
       - uses: actions/checkout@v4
 
@@ -61,7 +52,7 @@ jobs:
 
   apply:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+    needs: plan
     steps:
       - uses: actions/checkout@v4
 
@@ -78,16 +69,11 @@ jobs:
         with:
             project_id: ${{ secrets.GCP_TERRAFORM_PROJECT_ID }}
 
-      - name: Download Plan from Previous Run
-        uses: dawidd6/action-download-artifact@v3
+      - name: Download Plan
+        uses: actions/download-artifact@v5
         with:
           name: tfplan
           path: infra/environments/shared/
-          workflow: shared-infra.yml
-          branch: main
-          event: push
-          search_artifacts: true
-          if_no_artifact_found: fail
 
       - name: Terraform Init
         run: make init
