@@ -86,7 +86,7 @@ module "gke" {
 
   enable_istio     = true
   enable_autopilot = true
-  node_count       = 3
+  node_count       = 1
   machine_type     = "e2-standard-2"
 
   labels = local.common_labels
