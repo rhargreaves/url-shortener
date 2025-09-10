@@ -1,9 +1,17 @@
-ifeq ($(TERRAFORM_PROJECT_ID),)
-$(error TERRAFORM_PROJECT_ID is not set)
-endif
-ifeq ($(TERRAFORM_BUCKET_PREFIX),)
-$(error TERRAFORM_BUCKET_PREFIX is not set)
-endif
+REQUIRED_VARS := \
+	TF_VAR_organization_id \
+	TF_VAR_billing_account \
+	TF_VAR_domain_name \
+	TF_VAR_folder_id \
+	TF_VAR_project_prefix \
+	TF_VAR_notification_email \
+	REGION \
+	TERRAFORM_PROJECT_ID \
+	TERRAFORM_BUCKET_PREFIX
+
+$(foreach var,$(REQUIRED_VARS),\
+  $(if $($(var)),,$(error $(var) is not set))\
+)
 
 init:
 	@echo "Creating Terraform state buckets..."
