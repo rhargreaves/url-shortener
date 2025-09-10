@@ -1,4 +1,4 @@
-# Enterprise URL Shortener on GCP
+# URL Shortener
 
 Small URLs, huge cloud bill :rocket: :moneybag:
 
