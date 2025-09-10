@@ -142,7 +142,7 @@ resource "google_container_node_pool" "primary_nodes" {
   node_config {
     preemptible  = false
     machine_type = var.machine_type
-    disk_size_gb = 100
+    disk_size_gb = 25
     disk_type    = "pd-ssd"
 
     oauth_scopes = local.gke_auth_scopes
@@ -165,7 +165,7 @@ resource "google_container_node_pool" "primary_nodes" {
 
   autoscaling {
     min_node_count = 1
-    max_node_count = 10
+    max_node_count = 5
   }
 
   upgrade_settings {
