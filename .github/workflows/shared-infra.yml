@@ -43,7 +43,7 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-            project_id: ${{ secrets.GCP_TERRAFORM_PROJECT_ID }}
+          project_id: ${{ secrets.GCP_TERRAFORM_PROJECT_ID }}
 
       - name: Terraform Init
         run: make init
@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
-          path: tfplan
+          path: infra/environments/shared/tfplan
 
   apply:
     runs-on: ubuntu-latest
@@ -80,6 +80,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan
+          path: infra/environments/shared/
 
       - name: Terraform Apply
         run: make apply-shared
