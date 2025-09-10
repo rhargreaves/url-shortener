@@ -26,71 +26,44 @@ init:
 		-backend-config="prefix=prod/terraform.tfstate"
 .PHONY: init
 
-# Check required environment variables
-.PHONY: check-env
-check-env:
-	@if [ -z "$$TF_VAR_organization_id" ]; then \
-		echo "ERROR: TF_VAR_organization_id is not set"; \
-		echo "Please set: export TF_VAR_organization_id='your-org-id'"; \
-		exit 1; \
-	fi
-	@if [ -z "$$TF_VAR_billing_account" ]; then \
-		echo "ERROR: TF_VAR_billing_account is not set"; \
-		echo "Please set: export TF_VAR_billing_account='your-billing-account'"; \
-		exit 1; \
-	fi
-	@if [ -z "$$TF_VAR_domain_name" ]; then \
-		echo "ERROR: TF_VAR_domain_name is not set"; \
-		echo "Please set: export TF_VAR_domain_name='your-domain.com'"; \
-		exit 1; \
-	fi
-	@echo "✅ Required environment variables are set"
-	@echo "ℹ️  Optional: Set TF_VAR_folder_id if using GCP folders"
-
 # Shared environment
+plan-shared:
+	cd infra/environments/shared && terraform plan -var-file=terraform.tfvars -out=tfplan
 .PHONY: plan-shared
-plan-shared: check-env
-	@echo "🔧 Configuring shared environment..."
-	@source scripts/env-shared.sh && cd infra/environments/shared && terraform plan -var-file=terraform.tfvars -out=tfplan
 
+apply-shared:
+	cd infra/environments/shared && terraform apply -var-file=terraform.tfvars -auto-approve tfplan
 .PHONY: apply-shared
-apply-shared: check-env
-	@echo "🔧 Configuring shared environment..."
-	@source scripts/env-shared.sh && cd infra/environments/shared && terraform apply -var-file=terraform.tfvars -auto-approve tfplan
 
-.PHONY: destroy-shared
 destroy-shared:
 	cd infra/environments/shared && terraform destroy -var-file=terraform.tfvars -auto-approve
+.PHONY: destroy-shared
 
 # Development environment
+plan-dev:
+	cd infra/environments/dev && terraform plan -var-file=terraform.tfvars
 .PHONY: plan-dev
-plan-dev: check-env
-	@echo "🔧 Configuring development environment..."
-	@source scripts/env-dev.sh && cd infra/environments/dev && terraform plan -var-file=terraform.tfvars
 
+apply-dev:
+	cd infra/environments/dev && terraform apply -var-file=terraform.tfvars -auto-approve
 .PHONY: apply-dev
-apply-dev: check-env
-	@echo "🔧 Configuring development environment..."
-	@source scripts/env-dev.sh && cd infra/environments/dev && terraform apply -var-file=terraform.tfvars -auto-approve
 
-.PHONY: destroy-dev
 destroy-dev:
 	cd infra/environments/dev && terraform destroy -var-file=terraform.tfvars -auto-approve
+.PHONY: destroy-dev
 
 # Production environment
+plan-prod:
+	cd infra/environments/prod && terraform plan -var-file=terraform.tfvars
 .PHONY: plan-prod
-plan-prod: check-env
-	@echo "🚀 Configuring production environment..."
-	@source scripts/env-prod.sh && cd infra/environments/prod && terraform plan -var-file=terraform.tfvars
 
+apply-prod:
+	cd infra/environments/prod && terraform apply -var-file=terraform.tfvars -auto-approve
 .PHONY: apply-prod
-apply-prod: check-env
-	@echo "🚀 Configuring production environment..."
-	@source scripts/env-prod.sh && cd infra/environments/prod && terraform apply -var-file=terraform.tfvars -auto-approve
 
-.PHONY: destroy-prod
 destroy-prod:
 	cd infra/environments/prod && terraform destroy -var-file=terraform.tfvars -auto-approve
+.PHONY: destroy-prod
 
 # Build and deploy
 .PHONY: build
