@@ -102,4 +102,5 @@ module "bastion" {
   network      = module.shared_vpc.vpc_network
   subnet       = module.shared_vpc.gke_subnet
   zone         = var.zones[0]
+  iap_users    = var.iap_users
 }

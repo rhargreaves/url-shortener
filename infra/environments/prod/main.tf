@@ -27,4 +27,5 @@ module "infrastructure" {
   environment     = var.environment
   project_prefix  = var.project_prefix
   domain_name     = var.domain_name
+  iap_users       = var.iap_users
 }

@@ -42,3 +42,8 @@ variable "domain_name" {
   description = "Domain name for the URL shortener"
   type        = string
 }
+
+variable "iap_users" {
+  description = "IAP users"
+  type        = list(string)
+}

@@ -22,3 +22,11 @@ resource "google_compute_instance" "bastion" {
 
   tags = ["bastion"]
 }
+
+resource "google_iap_tunnel_instance_iam_binding" "bastion_iap_users" {
+  project  = var.project_id
+  zone     = var.zone
+  instance = google_compute_instance.bastion.name
+  role     = "roles/iap.tunnelResourceAccessor"
+  members  = var.iap_users
+}

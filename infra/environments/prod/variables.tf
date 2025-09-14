@@ -62,3 +62,8 @@ variable "machine_type" {
   description = "Machine type for GKE nodes (if not using Autopilot)"
   type        = string
 }
+
+variable "iap_users" {
+  description = "IAP users"
+  type        = list(string)
+}

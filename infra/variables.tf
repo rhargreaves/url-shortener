@@ -41,3 +41,8 @@ variable "domain_name" {
   description = "Domain name for the URL shortener (set via TF_VAR_domain_name)"
   type        = string
 }
+
+variable "iap_users" {
+  description = "IAP users"
+  type        = list(string)
+}

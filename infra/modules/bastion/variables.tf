@@ -22,3 +22,8 @@ variable "zone" {
   description = "Zone"
   type        = string
 }
+
+variable "iap_users" {
+  description = "IAP users"
+  type        = list(string)
+}

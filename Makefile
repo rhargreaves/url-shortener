@@ -5,6 +5,7 @@ REQUIRED_VARS := \
 	TF_VAR_folder_id \
 	TF_VAR_project_prefix \
 	TF_VAR_notification_email \
+	TF_VAR_iap_users \
 	REGION \
 	TERRAFORM_PROJECT_ID \
 	TERRAFORM_BUCKET_PREFIX
