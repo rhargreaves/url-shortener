@@ -49,11 +49,11 @@ destroy-shared:
 
 # Development environment
 plan-dev:
-	cd infra/environments/dev && terraform plan -var-file=terraform.tfvars
+	cd infra/environments/dev && terraform plan -var-file=terraform.tfvars -out=tfplan
 .PHONY: plan-dev
 
 apply-dev:
-	cd infra/environments/dev && terraform apply -var-file=terraform.tfvars -auto-approve
+	cd infra/environments/dev && terraform apply tfplan
 .PHONY: apply-dev
 
 destroy-dev:
@@ -62,11 +62,11 @@ destroy-dev:
 
 # Production environment
 plan-prod:
-	cd infra/environments/prod && terraform plan -var-file=terraform.tfvars
+	cd infra/environments/prod && terraform plan -var-file=terraform.tfvars -out=tfplan
 .PHONY: plan-prod
 
 apply-prod:
-	cd infra/environments/prod && terraform apply -var-file=terraform.tfvars -auto-approve
+	cd infra/environments/prod && terraform apply tfplan
 .PHONY: apply-prod
 
 destroy-prod:
