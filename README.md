@@ -1,5 +1,9 @@
 # URL Shortener
 
+[![Shared Infra](https://github.com/rhargreaves/url-shortener/actions/workflows/shared-infra.yml/badge.svg)](https://github.com/rhargreaves/url-shortener/actions/workflows/shared-infra.yml)
+[![Dev Infra](https://github.com/rhargreaves/url-shortener/actions/workflows/dev-infra.yml/badge.svg)](https://github.com/rhargreaves/url-shortener/actions/workflows/dev-infra.yml)
+[![Destroy All](https://github.com/rhargreaves/url-shortener/actions/workflows/destroy-all.yml/badge.svg)](https://github.com/rhargreaves/url-shortener/actions/workflows/destroy-all.yml)
+
 Small URLs, huge cloud bill :rocket: :moneybag:
 
 This project demonstrates a production-ready URL shortener service deployed on GKE.
