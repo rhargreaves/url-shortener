@@ -13,7 +13,11 @@ $(foreach var,$(REQUIRED_VARS),\
   $(if $($(var)),,$(error $(var) is not set))\
 )
 
-init:
+local-init:
+	cd infra && terraform init
+.PHONY: local-init
+
+init: local-init
 	@echo "Creating Terraform state buckets..."
 	gsutil mb -p $(TERRAFORM_PROJECT_ID) gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-dev || true
 	gsutil mb -p $(TERRAFORM_PROJECT_ID) gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-prod || true
@@ -22,7 +26,6 @@ init:
 	gsutil versioning set on gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-prod
 	gsutil versioning set on gs://$(TERRAFORM_BUCKET_PREFIX)-terraform-state-shared
 	@echo "Initializing Terraform..."
-	cd infra && terraform init
 	cd infra/environments/shared && terraform init -upgrade \
 			-backend-config="bucket=$(TERRAFORM_BUCKET_PREFIX)-terraform-state-shared" \
 			-backend-config="prefix=shared/terraform.tfstate"

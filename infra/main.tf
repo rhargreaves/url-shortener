@@ -93,3 +93,13 @@ module "gke" {
 
   depends_on = [module.app_project, module.shared_vpc]
 }
+
+module "bastion" {
+  source = "./modules/bastion"
+
+  project_id   = module.app_project.project_id
+  bastion_name = "${var.environment}-bastion"
+  network      = module.shared_vpc.vpc_network
+  subnet       = module.shared_vpc.gke_subnet
+  zone         = var.zones[0]
+}
