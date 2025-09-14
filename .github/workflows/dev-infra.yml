@@ -4,14 +4,21 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-        - '.github/workflows/destroy-all.yml'
-        - 'docs/**'
-        - 'k8s/**'
+    paths:
+      - 'infra/**'
+      - '.github/workflows/dev-infra.yml'
+      - '.github/workflows/shared-infra.yml'
   workflow_dispatch:
 
 jobs:
-  infra:
+  shared-infra:
+    uses: ./.github/workflows/infra.yml
+    with:
+      environment: shared
+    secrets: inherit
+
+  dev-infra:
+    needs: shared-infra
     uses: ./.github/workflows/infra.yml
     with:
       environment: dev

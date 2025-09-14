@@ -1,13 +1,6 @@
 name: Shared Infra
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-        - '.github/workflows/destroy-all.yml'
-        - 'docs/**'
-        - 'k8s/**'
   workflow_dispatch:
 
 jobs:
