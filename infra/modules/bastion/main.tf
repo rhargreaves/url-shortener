@@ -20,7 +20,7 @@ resource "google_compute_instance" "bastion" {
     enable-oslogin = "TRUE"
   }
 
-  tags = ["bastion"]
+  tags = ["bastion", "ssh-allowed"]
 }
 
 resource "google_iap_tunnel_instance_iam_binding" "bastion_iap_users" {
