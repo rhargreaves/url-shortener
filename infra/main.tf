@@ -43,7 +43,8 @@ module "app_project" {
     "redis.googleapis.com",
     "sqladmin.googleapis.com",
     "cloudkms.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "iap.googleapis.com"
   ]
 
   labels = merge(local.common_labels, {
