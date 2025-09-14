@@ -36,11 +36,11 @@ init:
 
 # Shared environment
 plan-shared:
-	cd infra/environments/shared && terraform plan -var-file=terraform.tfvars -out=tfplan
+	cd infra/environments/shared && terraform plan -var-file=terraform.tfvars -out=tfplan-shared
 .PHONY: plan-shared
 
 apply-shared:
-	cd infra/environments/shared && terraform apply tfplan
+	cd infra/environments/shared && terraform apply tfplan-shared
 .PHONY: apply-shared
 
 destroy-shared:
@@ -49,11 +49,11 @@ destroy-shared:
 
 # Development environment
 plan-dev:
-	cd infra/environments/dev && terraform plan -var-file=terraform.tfvars -out=tfplan
+	cd infra/environments/dev && terraform plan -var-file=terraform.tfvars -out=tfplan-dev
 .PHONY: plan-dev
 
 apply-dev:
-	cd infra/environments/dev && terraform apply tfplan
+	cd infra/environments/dev && terraform apply tfplan-dev
 .PHONY: apply-dev
 
 destroy-dev:
@@ -62,11 +62,11 @@ destroy-dev:
 
 # Production environment
 plan-prod:
-	cd infra/environments/prod && terraform plan -var-file=terraform.tfvars -out=tfplan
+	cd infra/environments/prod && terraform plan -var-file=terraform.tfvars -out=tfplan-prod
 .PHONY: plan-prod
 
 apply-prod:
-	cd infra/environments/prod && terraform apply tfplan
+	cd infra/environments/prod && terraform apply tfplan-prod
 .PHONY: apply-prod
 
 destroy-prod:

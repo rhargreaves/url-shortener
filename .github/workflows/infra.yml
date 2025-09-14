@@ -46,7 +46,7 @@ jobs:
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan
+          name: tfplan-${{ inputs.environment }}
           path: infra/environments/${{ inputs.environment }}/tfplan
           retention-days: 7
           if-no-files-found: error
@@ -73,7 +73,7 @@ jobs:
       - name: Download Plan
         uses: actions/download-artifact@v5
         with:
-          name: tfplan
+          name: tfplan-${{ inputs.environment }}
           path: infra/environments/${{ inputs.environment }}/
 
       - name: Terraform Init
