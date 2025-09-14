@@ -8,6 +8,7 @@ on:
       - 'infra/**'
       - '.github/workflows/dev-infra.yml'
       - '.github/workflows/shared-infra.yml'
+      - 'Makefile'
   workflow_dispatch:
 
 jobs:
